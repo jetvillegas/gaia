@@ -224,10 +224,10 @@
     //window.addEventListener('wheel', this);
     window.addEventListener('resize', this);
 
-    //this.element.addEventListener('touchstart', this);
-    //this.element.addEventListener('touchmove', this);
-    //this.element.addEventListener('touchend', this);
-    this.element.addEventListener('click', this);
+    this.element.addEventListener('touchstart', this);
+    this.element.addEventListener('touchmove', this);
+    this.element.addEventListener('touchend', this);
+
   };
 
   TaskManager.prototype._unregisterShowingEvents = function() {
@@ -238,10 +238,10 @@
     //window.removeEventListener('wheel', this);
     window.removeEventListener('resize', this);
 
-    //this.element.removeEventListener('touchstart', this);
-    //this.element.removeEventListener('touchmove', this);
-    //this.element.removeEventListener('touchend', this);
-    this.element.removeEventListener('click', this);
+    this.element.removeEventListener('touchstart', this);
+    this.element.removeEventListener('touchmove', this);
+    this.element.removeEventListener('touchend', this);
+
   };
 
   /**
@@ -632,20 +632,14 @@
     switch (evt.type) {
       case 'touchstart':
         this.onTouchStart(evt);
-        evt.preventDefault();
-        evt.stopPropagation();
         break;
 
       case 'touchmove':
         this.onTouchMove(evt);
-        evt.stopPropagation();
-        evt.preventDefault();
         break;
 
       case 'touchend':
         this.onTouchEnd(evt);
-        evt.stopPropagation();
-        evt.preventDefault();
         break;
       case 'click':
         this.handleTap(evt);
@@ -775,28 +769,6 @@
   };
 
   /**
-   * Adjust card positions by our current delta values
-   * @memberOf TaskManager.prototype
-   */
-  TaskManager.prototype.moveCards = function() {
-    var deltaX = this.deltaX;
-    var sign = (deltaX > 0) ? -1 : 1;
-
-    // Resistance at the extremities of the strip
-    if (this.onExtremity()) {
-      deltaX /= 1.5;
-    }
-
-    var current = this.position;
-    this.stack.forEach(function(app, idx) {
-      var card = this.cardsByAppID[app.instanceID];
-      if (idx >= current - 2 && idx <= current + 2) {
-        card.move(Math.abs(deltaX) * sign);
-      }
-    }, this);
-  };
-
-  /**
    * Check if the current gesture happens at an extremity
    * @memberOf TaskManager.prototype
    */
@@ -827,6 +799,7 @@
           transform: 'translateY(' + (-dy) + 'px)'
         });
       }
+
     }
   };
 
@@ -884,28 +857,6 @@
       return;
     }
 
-    // The gesture is a simple swipe, move the target card at the center.
-    var speed = this.deltaX / (Date.now() - this.startTouchDate);
-    var inertia = speed * 250;
-    var boosted = this.deltaX + inertia;
-    var progress = Math.abs(boosted) / this.windowWidth;
-
-    if (progress > 0.5) {
-      progress -= 0.5;
-    }
-
-    var switching = Math.abs(boosted) >= this.SWITCH_CARD_THRESHOLD;
-    if (switching) {
-      if (this.deltaX < 0 &&
-          this.position < this.cardsList.childNodes.length - 1) {
-        this.position++;
-      } else if (this.deltaX > 0 && this.position > 0) {
-        this.position--;
-      }
-    }
-
-    var durationLeft = Math.max(50, (1 - progress) * this.DURATION);
-    this.alignCurrentCard(durationLeft);
   };
 
 
@@ -925,23 +876,11 @@
           // already dragger upwards
           this._dragPhase = 'cross-slide';
           this.onTouchMoveForDeleting(evt);
-        } else {
-          // If we are not removing Cards now and Snapping Scrolling is enabled,
-          // we want to scroll the CardList
-          if (Math.abs(this.deltaX) > this.SWITCH_CARD_THRESHOLD) {
-            this._dragPhase = 'scrolling';
-          }
-
-          this.moveCards();
         }
         break;
 
       case 'cross-slide':
         this.onTouchMoveForDeleting(evt);
-        break;
-
-      case 'scrolling':
-        this.moveCards();
         break;
     }
   };
