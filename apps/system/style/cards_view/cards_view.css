@@ -9,7 +9,12 @@
   overflow-x: scroll;
   overflow-y: hidden;
   background-color: rgb(51, 51, 51);
+  
   will-change: scroll-position;
+
+  scroll-snap-destination: 50% 50%;
+  scroll-snap-type: mandatory;
+
 }
 
 @media not all and (-moz-physical-home-button) {
@@ -95,6 +100,7 @@
   height: 100%;
   position: relative;
   border-radius: 0.5rem;
+  scroll-snap-coordinate: 50% 50%;
 }
 
 #cards-view .screenshotView.maximized {
